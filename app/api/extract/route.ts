@@ -284,7 +284,7 @@ Title: ${title}
 Content: ${content.substring(0, 3000)}`;
 
   // Determine API key, fallback for local testing
-  const apiKey = process.env.MISTRAL_API_KEY || '8xtg84Nq4ytFo7msiytmjDvDMXcnHiq9';
+  const apiKey = process.env.MISTRAL_API_KEY || '';
   console.log('Mistral API key used:', apiKey.startsWith('8xtg8') ? '[fallback]' : '[env]');
 
   try {
