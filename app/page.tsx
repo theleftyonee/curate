@@ -61,41 +61,43 @@ export default function CurateApp() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white relative">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-950 to-black text-gray-100 relative overflow-x-hidden">
       {/* Particle Background */}
       <ParticleEffect />
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-4 py-0 -mt-20">
+      <div className="relative z-10 container mx-auto px-4 py-8 md:py-12 -mt-20">
         {/* Header Section */}
-        <div className="text-center mb-12 pt-0">
-          <p className="text-gray-300 text-xl md:text-2xl max-w-2xl mx-auto font-light">
+        <div className="text-center mb-16 pt-8 md:pt-12">
+          <p className="text-gray-200 text-2xl md:text-3xl lg:text-4xl max-w-3xl mx-auto font-light tracking-tight leading-relaxed">
             Link Archiving, Categorization & Summarization
           </p>
-          <p className="text-gray-500 text-sm mt-3 font-light">
+          <p className="text-gray-400 text-sm md:text-base mt-4 md:mt-5 font-light max-w-2xl mx-auto leading-relaxed">
             Automatically categorize, organize and summarize your links with intelligent metadata extraction
           </p>
         </div>
 
         {/* URL Input Form */}
-        <Card className="max-w-4xl mx-auto mb-8 bg-gray-900/30 border-gray-700/50 backdrop-blur-md shadow-2xl transition-all duration-300 hover:bg-gray-900/40 hover:border-gray-600/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-white text-lg font-light">Enter URL to Analyze</CardTitle>
+        <Card className="max-w-4xl mx-auto mb-12 bg-gray-900/80 border border-gray-800/80 backdrop-blur-sm rounded-lg">
+          <CardHeader className="pb-4 pt-5 px-6">
+            <CardTitle className="text-gray-300 text-lg font-normal tracking-tight">
+              Enter URL to Analyze
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="flex gap-4">
+          <CardContent className="px-6 pb-6">
+            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
               <Input
                 type="url"
-                placeholder="https://example.com"
+                placeholder="https://example.com/article"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="flex-1 bg-gray-800/50 border-gray-600/50 text-white placeholder-gray-400 focus:border-cyan-400/50 focus:ring-cyan-400/20 transition-all duration-300 backdrop-blur-sm"
+                className="flex-1 h-11 bg-gray-950/80 border-gray-800 text-gray-200 placeholder-gray-500 focus:border-gray-700 focus:ring-1 focus:ring-gray-700/50 transition-all duration-200 rounded-lg"
                 disabled={loading}
               />
               <Button
                 type="submit"
                 disabled={loading || !url.trim()}
-                className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-white shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed px-8"
+                className="h-11 bg-gray-800 hover:bg-gray-700 text-gray-200 shadow-sm hover:shadow transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed px-6 font-normal rounded-lg"
               >
                 {loading ? (
                   <>
@@ -108,7 +110,7 @@ export default function CurateApp() {
               </Button>
             </form>
             {error && (
-              <div className="mt-4 p-4 bg-red-900/30 border border-red-700/50 rounded-lg backdrop-blur-sm animate-in slide-in-from-top-2 duration-300">
+              <div className="mt-4 p-3 bg-red-950/50 border border-red-900/50 rounded-lg">
                 <p className="text-red-300 text-sm">{error}</p>
               </div>
             )}
@@ -117,53 +119,54 @@ export default function CurateApp() {
 
         {/* Results Display */}
         {result && (
-          <Card className="max-w-4xl mx-auto bg-gray-900/30 border-gray-700/50 backdrop-blur-md shadow-2xl animate-in slide-in-from-bottom-4 duration-500">
-            <CardHeader className="border-b border-gray-800/50">
-              <CardTitle className="text-white flex items-center gap-2 font-light">
-                <ExternalLink className="w-5 h-5 text-cyan-400" />
+          <Card className="max-w-4xl mx-auto bg-gray-900/80 border border-gray-800/80 backdrop-blur-sm rounded-lg mb-12">
+            <CardHeader className="border-b border-gray-800/80 px-6 py-5">
+              <CardTitle className="text-gray-300 text-lg font-normal tracking-tight">
                 Analysis Results
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6 p-6">
               {/* Summary Section */}
               {result.summary && (
-                <div className="border border-gray-800 rounded-lg p-5 bg-gray-900/50 backdrop-blur-md">
-                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-cyan-400" />
+                <div className="border border-gray-800/80 rounded-lg p-5 bg-gray-950/80">
+                  <h3 className="text-base font-medium text-gray-300 mb-3">
                     Summary
                   </h3>
-                  <ul className="list-disc list-inside text-gray-300 text-sm leading-relaxed space-y-1">
-                    {result.summary.split('\n').map((line, idx) => (
-                      <li key={idx}>{line.trim()}</li>
+                  <ul className="list-none space-y-2 text-gray-300 text-sm leading-relaxed">
+                    {result.summary.split('\n').filter(line => line.trim()).map((line, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-gray-400 mr-1">•</span>
+                        <span>{line.trim()}</span>
+                      </li>
                     ))}
                   </ul>
                 </div>
               )}
 
               {/* Metadata Overview */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Title</h3>
-                    <p className="text-gray-300">{result.title}</p>
+                  <div className="p-4 rounded-lg bg-gray-950/80 border border-gray-800/80">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Title</h3>
+                    <p className="text-gray-200 text-sm leading-relaxed">{result.title}</p>
                   </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Description</h3>
+                  <div className="p-4 rounded-lg bg-gray-950/80 border border-gray-800/80">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Description</h3>
                     <p className="text-gray-300 text-sm leading-relaxed">
-                      {result.description || "No description available"}
+                      {result.description || <span className="text-gray-600 italic">No description available</span>}
                     </p>
                   </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2">Category</h3>
-                    <div className="flex gap-2">
-                      <Badge className="bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-lg">
+                  <div className="p-4 rounded-lg bg-gray-950/80 border border-gray-800/80">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Category</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className="bg-gray-800 text-gray-200 px-2.5 py-1 text-xs font-normal border border-gray-700">
                         {result.category}
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="border-gray-600/50 text-gray-300 bg-gray-800/30 backdrop-blur-sm"
+                        className="border-gray-700 text-gray-300 bg-gray-900/50 px-2.5 py-1 text-xs font-normal"
                       >
                         {result.subcategory}
                       </Badge>
@@ -173,43 +176,42 @@ export default function CurateApp() {
 
                 <div className="space-y-4">
                   {result.image && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" />
+                    <div className="p-4 rounded-lg bg-gray-950/80 border border-gray-800/80">
+                      <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">
                         Preview Image
                       </h3>
-                      <img
-                        src={result.image || "/placeholder.svg"}
-                        alt="Page preview"
-                        className="w-full max-w-sm rounded-lg border border-gray-700"
-                        onError={(e) => {
-                          e.currentTarget.style.display = "none"
-                        }}
-                      />
+                      <div className="relative overflow-hidden rounded-lg border border-gray-800/80 bg-gray-900/50">
+                        <img
+                          src={result.image || "/placeholder.svg"}
+                          alt="Page preview"
+                          className="w-full max-w-sm rounded-lg"
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none"
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-                      <Tag className="w-4 h-4" />
+                  <div className="p-4 rounded-lg bg-gray-950/80 border border-gray-800/80">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
                       Keywords
                     </h3>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5">
                       {result.keywords.length > 0 ? (
                         result.keywords.map((keyword, index) => (
-                          <Badge key={index} variant="outline" className="border-gray-600 text-gray-300 text-xs">
+                          <Badge key={index} variant="outline" className="border-gray-700 text-gray-300 bg-gray-900/50 text-xs px-2 py-0.5 font-normal">
                             {keyword}
                           </Badge>
                         ))
                       ) : (
-                        <span className="text-gray-500 text-sm">No keywords extracted</span>
+                        <span className="text-gray-600 text-sm italic">No keywords extracted</span>
                       )}
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
+                  <div className="p-4 rounded-lg bg-gray-950/80 border border-gray-800/80">
+                    <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
                       Extracted At
                     </h3>
                     <p className="text-gray-300 text-sm">{new Date(result.extractedAt).toLocaleString()}</p>
@@ -218,53 +220,52 @@ export default function CurateApp() {
               </div>
 
               {/* Detailed Metadata Table */}
-              <div className="border-t border-gray-800 pt-6">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
+              <div className="border-t border-gray-800/80 pt-5">
+                <h3 className="text-base font-medium text-gray-300 mb-4">
                   Detailed Information
                 </h3>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-lg border border-gray-800/80 bg-gray-950/80">
                   <table className="w-full border-collapse">
                     <tbody className="text-sm">
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400 w-1/4">URL</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 w-1/4 uppercase text-xs tracking-wider">URL</td>
                         <td className="py-3 px-4 text-gray-300 break-all">
                           <a
                             href={result.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-cyan-400 hover:text-cyan-300 transition-colors"
+                            className="text-gray-400 hover:text-gray-300 transition-colors duration-200"
                           >
                             {result.url}
                           </a>
                         </td>
                       </tr>
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400">Title</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Title</td>
                         <td className="py-3 px-4 text-gray-300">{result.title}</td>
                       </tr>
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400">Description</td>
-                        <td className="py-3 px-4 text-gray-300">{result.description || "N/A"}</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Description</td>
+                        <td className="py-3 px-4 text-gray-300">{result.description || <span className="text-gray-600 italic">N/A</span>}</td>
                       </tr>
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400">Category</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Category</td>
                         <td className="py-3 px-4 text-gray-300">{result.category}</td>
                       </tr>
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400">Subcategory</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Subcategory</td>
                         <td className="py-3 px-4 text-gray-300">{result.subcategory}</td>
                       </tr>
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400">Image URL</td>
-                        <td className="py-3 px-4 text-gray-300 break-all">{result.image || "N/A"}</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Image URL</td>
+                        <td className="py-3 px-4 text-gray-300 break-all">{result.image || <span className="text-gray-600 italic">N/A</span>}</td>
                       </tr>
-                      <tr className="border-b border-gray-800">
-                        <td className="py-3 px-4 font-medium text-gray-400">Keywords</td>
-                        <td className="py-3 px-4 text-gray-300">{result.keywords.join(", ") || "N/A"}</td>
+                      <tr className="border-b border-gray-800/80">
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Keywords</td>
+                        <td className="py-3 px-4 text-gray-300">{result.keywords.join(", ") || <span className="text-gray-600 italic">N/A</span>}</td>
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 font-medium text-gray-400">Extracted At</td>
+                        <td className="py-3 px-4 font-medium text-gray-500 uppercase text-xs tracking-wider">Extracted At</td>
                         <td className="py-3 px-4 text-gray-300">{new Date(result.extractedAt).toLocaleString()}</td>
                       </tr>
                     </tbody>
@@ -274,12 +275,16 @@ export default function CurateApp() {
 
               {/* Body Content Preview */}
               {result.bodyContent && (
-                <div className="border-t border-gray-800 pt-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Content Preview</h3>
-                  <div className="bg-gray-800/50 rounded-lg p-4 max-h-64 overflow-y-auto">
+                <div className="border-t border-gray-800/80 pt-5">
+                  <h3 className="text-base font-medium text-gray-300 mb-3">
+                    Content Preview
+                  </h3>
+                  <div className="bg-gray-950/80 rounded-lg p-4 max-h-96 overflow-y-auto border border-gray-800/80 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900/50">
                     <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
-                      {result.bodyContent.substring(0, 1000)}
-                      {result.bodyContent.length > 1000 && "..."}
+                      {result.bodyContent.substring(0, 3000)}
+                      {result.bodyContent.length > 3000 && (
+                        <span className="text-gray-600 italic"> ...</span>
+                      )}
                     </p>
                   </div>
                 </div>

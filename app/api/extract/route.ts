@@ -276,16 +276,42 @@ function categorizeContent(
   return { category: bestMatch.category, subcategory: bestMatch.subcategory }
 }
 
-async function generateSummary(title: string, content: string): Promise<string> {
-  // Prepare prompt
-  const prompt = `You are an expert summarization AI focused on absolute brevity. Produce a concise bullet-list summary with at most 5 punchy, standalone points. Prioritize root causes, key consequences, systemic failures, vital statistics, and essential arguments. No fluff or background. Keep the entire summary under 60 words.
-Title: ${title}
+async function generateSummary(title: string, description: string, content: string, url: string): Promise<string> {
+  // Check if API key is available
+  const apiKey = process.env.MISTRAL_API_KEY;
+  
+  // Extract domain safely
+  let domain = 'website';
+  try {
+    if (url) {
+      domain = new URL(url).hostname;
+    }
+  } catch {
+    // If URL parsing fails, use default domain
+  }
+  
+  if (!apiKey || apiKey.trim() === '') {
+    console.error('MISTRAL_API_KEY is not set in environment variables');
+    // Return a basic analysis based on content if API key is missing
+    const contentPreview = content.split(/\s+/).slice(0, 30).join(' ');
+    return `• Function: ${title}\n• Content: ${description || contentPreview}...\n• Purpose: Website at ${domain}`;
+  }
 
-Content: ${content.substring(0, 3000)}`;
+  // Prepare intelligent analysis prompt focused on what the website is about
+  const prompt = `Analyze this website and explain what it is about. Provide a clear, informative bullet-point summary that describes:
 
-  // Determine API key, fallback for local testing
-  const apiKey = process.env.MISTRAL_API_KEY || '';
-  console.log('Mistral API key used:', apiKey.startsWith('8xtg8') ? '[fallback]' : '[env]');
+1. WHAT THE WEBSITE IS ABOUT: Give a clear overview of what this website does, its main topic or purpose
+2. FUNCTION: What is its primary function or service? What does it offer to users?
+3. CONTENT DELIVERY: How does it deliver information? (e.g., articles, videos, e-commerce products, interactive tools, blog posts, documentation, tutorials, etc.)
+4. PURPOSE: Who is the target audience and what is the main goal?
+
+Be specific and descriptive. Explain what the website is about in a way that helps someone understand its nature and purpose. Use bullet format with • symbol. Start each bullet with • followed by space.
+
+Website Title: ${title}
+Description: ${description || 'N/A'}
+Domain: ${domain}
+
+Full Content: ${content.substring(0, 5000)}`;
 
   try {
     const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
@@ -294,14 +320,51 @@ Content: ${content.substring(0, 3000)}`;
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({ model: 'mistral-small-latest', messages: [{ role: 'user', content: prompt }], max_tokens: 100 }),
+      body: JSON.stringify({ 
+        model: 'mistral-small-latest', 
+        messages: [{ role: 'user', content: prompt }], 
+        max_tokens: 250,
+        temperature: 0.5
+      }),
     });
-    if (!response.ok) throw new Error(`API error ${response.status}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Mistral API error ${response.status}:`, errorText);
+      
+      // Try to parse error if it's JSON
+      let errorMessage = `API error ${response.status}`;
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.error?.message || errorMessage;
+      } catch {
+        // Use default error message
+      }
+      
+      throw new Error(errorMessage);
+    }
+
     const data = await response.json();
-    return (data.choices?.[0]?.message?.content || '').trim();
+    const summary = data.choices?.[0]?.message?.content || '';
+    
+    if (!summary || summary.trim() === '') {
+      throw new Error('Empty response from API');
+    }
+    
+    return summary.trim();
   } catch (err) {
     console.error('Mistral fetch error:', err);
-    return 'Summary generation failed. Please try again later.';
+    
+    // Return an intelligent fallback summary
+    // domain is already extracted at the top of the function
+    const contentPreview = content.split(/\s+/).slice(0, 30).join(' ');
+    const bulletPoints = [
+      `• Function: ${title} - Provides ${description ? description.substring(0, 50) : 'web content'}`,
+      `• Content Delivery: ${content.length > 100 ? 'Text-based content with articles/information' : 'Multimedia content'}`,
+      `• Purpose: Serves content to users via ${domain}`,
+    ];
+    
+    return bulletPoints.join('\n');
   }
 }
 
@@ -371,14 +434,14 @@ export async function POST(request: NextRequest) {
       ...headings.slice(0, 5),
     ].filter((k) => k.length > 2 && k.length < 50)
 
-    // Extract body content (first 1000 characters)
-    const bodyContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 1000)
+    // Extract body content (first 8000 characters for more informative preview and analysis)
+    const bodyContent = $("body").text().replace(/\s+/g, " ").trim().substring(0, 8000)
 
     // Categorize the content
     const { category, subcategory } = categorizeContent(title, description, url, keywords)
 
-    // Generate summary
-    const summary = await generateSummary(title, bodyContent)
+    // Generate summary with URL context for better analysis
+    const summary = await generateSummary(title, description, bodyContent, validUrl.toString())
 
     const result = {
       title,
@@ -396,6 +459,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result)
   } catch (error) {
     console.error("Error processing URL:", error)
-    return NextResponse.json({ error: "Failed to process URL. Please check the URL and try again." }, { status: 500 })
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+    console.error("Detailed error:", errorMessage)
+    return NextResponse.json({ 
+      error: error instanceof Error && error.message ? error.message : "Failed to process URL. Please check the URL and try again." 
+    }, { status: 500 })
   }
 }

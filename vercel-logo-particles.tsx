@@ -56,7 +56,7 @@ export default function Component() {
       const totalWidth = vercelLogoWidth + awsLogoWidth + logoSpacing
 
       // Draw CURATE text - moved up by adjusting the y position
-      ctx.font = `bold ${isMobile ? "80px" : "120px"} Arial, sans-serif`
+      ctx.font = `bold ${isMobile ? "120px" : "180px"} Arial, sans-serif`
       ctx.textAlign = "center"
       ctx.textBaseline = "middle"
       ctx.fillText("CURATE", canvas.width / 2, canvas.height / 2) // Changed from canvas.height / 2 to canvas.height / 3
@@ -122,7 +122,7 @@ export default function Component() {
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
       const { x: mouseX, y: mouseY } = mousePositionRef.current
-      const maxDistance = 240
+      const maxDistance = 400
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i]
